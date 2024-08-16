@@ -112,9 +112,9 @@ public class SBomGenerator
 	 * @param format Enumeration that tell us which file we are producing.
 	 * @throws SBomException if we are unable to produce the file.
 	 */
-	public static void createBomFile(Bom bom, SBomCommons.AVAILABLE_FORMATS format)
+	public static void createBomFile(Bom bom, CommandLine cli, SBomCommons.AVAILABLE_FORMATS format)
 	{
-		File file = new File("output/bom." + format.toString().toLowerCase());
+		File file = new File("output/" + cli.getOptionValue("name") + "_bom." + format.toString().toLowerCase());
 		try (FileWriter writer = new FileWriter(file))
 		{
 			writer.write(SBomCommons.generateOutputString(bom, format));
@@ -192,7 +192,7 @@ public class SBomGenerator
 	 * @param bom Bill of Materials to create the files form.
 	 * @throws SBomException in the event we can NOT create either the XML of JSon files.
 	 */
-	public static void generateBoms(Bom bom)
+	public static void generateBoms(Bom bom, CommandLine cli)
 	{
 		try
 		{	
@@ -201,8 +201,8 @@ public class SBomGenerator
 			
 			Files.createDirectories(Paths.get("output"));
 			
-			createBomFile(bom, SBomCommons.AVAILABLE_FORMATS.XML);
-			createBomFile(bom, SBomCommons.AVAILABLE_FORMATS.JSON);
+			// createBomFile(bom, cli, SBomCommons.AVAILABLE_FORMATS.XML);
+			createBomFile(bom, cli, SBomCommons.AVAILABLE_FORMATS.JSON);
 		}
 		catch (IOException ioe)
 		{
@@ -254,7 +254,7 @@ public class SBomGenerator
 				if (logger.isInfoEnabled())
 					logger.info(vendor + ", uses the APT package manager.");
 				UbuntuSBomGenerator generator = new UbuntuSBomGenerator();
-				bom = generator.generateSBom();
+				bom = generator.generateSBom(cli);
 			}
 			else
 			{
@@ -269,8 +269,10 @@ public class SBomGenerator
 		{
 			addBomTools(bom);
 			bom.getMetadata().setComponent(master);
-			softwareSize = bom.getComponents().size();
-			generateBoms(bom);
+			if (bom.getComponents() != null) {
+				softwareSize = bom.getComponents().size();
+			}
+			generateBoms(bom, cli);
 		}
 		return softwareSize;
 	}
@@ -320,7 +322,7 @@ public class SBomGenerator
 	private static Component createMasterComponent(String imageUrl) throws SBomException
 	{
 		Component master = new Component();
-		master.setType(org.cyclonedx.model.Component.Type.CONTAINER);
+		master.setType(org.cyclonedx.model.Component.Type.APPLICATION);
 
 		if (StringUtils.isValid(imageUrl))
 		{

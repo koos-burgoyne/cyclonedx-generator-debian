@@ -119,6 +119,8 @@ public class UnixSbomGeneratorApplication
 						"Name value to assign to top level component."));
 		cliOptions.addOption(new Option("v", "version", true,
 						"Version value to assign to top level component."));
+		cliOptions.addOption(new Option("p", "path", true,
+						"Path to debian package to interrogate."));
 		cliOptions.addOption(new Option("nc", "no-components", false, "Will only campture master " +
 						"component.  Will not include any components in the list of Components."));
 

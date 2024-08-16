@@ -3,7 +3,7 @@
 if [ -z "$JAVA_HOME" ]
 then
 	echo "\$JAVA_HOME is empty setting it now."
-	export JAVA_HOME=./jdk-11
+	export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-arm64
 	export CLASSPATH=$JAVA_HOME
 	export PATH=/bin:/usr/bin:$JAVA_HOME/bin
 else

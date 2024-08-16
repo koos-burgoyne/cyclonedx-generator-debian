@@ -128,7 +128,7 @@ public class UnixSBomGenerator
 			LicenseChoice license, String group, String version, String purl, String scope)
 	{
 		Component component = new Component();
-		component.setType(Type.OPERATING_SYSTEM);
+		component.setType(Type.LIBRARY);
 		
 		component.setName(software);
 		component.setDescription(detailMap.get("Description"));
@@ -434,19 +434,19 @@ public class UnixSBomGenerator
 		{
 			while ((line = reader.readLine()) != null)
 			{
-				if(!line.trim().startsWith("WARNING:"))
+				if(!line.trim().startsWith("WARNING:") || !line.trim().startsWith("Reading") || !line.trim().startsWith("Building"))
 				{	
 					if (preProcessed)
 					{
-						if(separator == '\n')
-							index = line.length();
-						else
-							index = line.indexOf(separator);
-						if (index > 0)
-						{
-							line = line.substring(0, index);
+						// if(separator == '\n')
+						// 	index = line.length();
+						// else
+						// 	index = line.indexOf(separator);
+						// if (index > 0)
+						// {
+							line = line.substring(0, line.length());
 							softwareList.add(line);
-						}
+						// }
 					}
 					else if (line.startsWith(preProcessingString))
 					{

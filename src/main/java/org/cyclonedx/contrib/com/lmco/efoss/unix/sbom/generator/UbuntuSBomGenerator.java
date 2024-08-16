@@ -17,6 +17,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.LicenseChoice;
@@ -36,7 +39,7 @@ public class UbuntuSBomGenerator extends UnixSBomGenerator
 	
 	private static final String SOFTWARE_INSTALLED_VERSION = "apt policy";
 	private static final String SOFTWARE_DETAIL_CMD = "apt show";
-	public static final String SOFTWARE_LIST_CMD = "apt list --installed";
+	public static final String SOFTWARE_LIST_CMD = "apt-rdepends --state-show=STATES ";
 	
 	private ProcessBuilder processBuilder = new ProcessBuilder();
 	
@@ -47,10 +50,9 @@ public class UbuntuSBomGenerator extends UnixSBomGenerator
 	 * @return Bom The Software Bill Of Materials for this Ubuntu Linux Operating System.
 	 * @throws SBomException if we are unable to build the SBOM.
 	 */
-	public Bom generateSBom()
+	public Bom generateSBom(CommandLine cli)
 	{
-		List<String> softwareList = generateListOfSoftware(SOFTWARE_LIST_CMD, '/',
-				"");
+		List<String> softwareList = generateListOfSoftware(SOFTWARE_LIST_CMD + cli.getOptionValue("name"), '/', cli.getOptionValue("name"));
 
 		Bom bom = new Bom();
 		
@@ -62,17 +64,19 @@ public class UbuntuSBomGenerator extends UnixSBomGenerator
 		String group = null;
 		LicenseChoice license = null;
 		Component component = null;
-		for (String software : softwareList)
-		{
-			if (logger.isDebugEnabled())
-				logger.debug("Generating Component (" + software + ")");
-			detailMap = produceDetailMap(software);
-			version = detailMap.get("Version");
-			group = detailMap.get("Release");
-			license = processLicense(software);
-			component = createComponents(software, detailMap, license, group,
-					version, null, detailMap.get("Priority"));
-			bom.addComponent(addPackageManager(component, PACKAGE_MANAGER));
+		if (softwareList.size() > 0) {
+			for (String software : softwareList)
+			{
+				if (logger.isDebugEnabled())
+					logger.debug("Generating Component (" + software + ")");
+				detailMap = produceDetailMap(software);
+				version = detailMap.get("Version");
+				group = detailMap.get("Release");
+				license = processLicense(software);
+				component = createComponents(software, detailMap, license, group,
+						version, null, detailMap.get("Priority"));
+				bom.addComponent(addPackageManager(component, PACKAGE_MANAGER));
+			}
 		}
 		
 		return bom;
